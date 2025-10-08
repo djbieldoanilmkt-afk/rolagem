@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tutorial de Rolagem da Equipe</title>
+<meta charset="UTF-8"> 
+<style>
+/* CSS: Estilo e Animação */
+body {
+    /* Fundo totalmente transparente para que apenas o texto apareça na live */
+    background-color: rgba(0, 0, 0, 0); 
+    margin: 0;
+    padding: 0;
+    overflow: hidden; 
+    height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.marquee-container {
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.scrolling-text {
+    /* Estilo do seu texto */
+    font-family: 'Montserrat', sans-serif; /* Fonte moderna */
+    font-size: 32px; 
+    font-weight: 800; /* Negrito extra */
+    color: #FFEB3B; /* Cor do texto: Amarelo vibrante (Mudado para ser igual a instrução) */
+    
+    /* Repete o texto para criar um efeito contínuo */
+    content: attr(data-text) " | " attr(data-text); 
+    padding-right: 50px; /* Espaço entre as repetições */
+    
+    /* A chave da rolagem */
+    display: inline-block;
+    padding-left: 100%; /* Começa o texto fora da tela */
+    animation: scroll-left 35s linear infinite; /* 20s = velocidade. Menor = mais rápido. */
+}
+
+/* Estilo para as instruções */
+.instruction {
+    color: #FFEB3B; /* Cor amarela para destaque */
+    font-weight: 900;
+}
+
+/* Definição da Animação */
+@keyframes scroll-left {
+  0%   { transform: translate(0, 0); } 
+  100% { transform: translate(-100%, 0); } 
+}
+</style>
+</head>
+<body>
+
+<div class="marquee-container">
+    <div class="scrolling-text">
+        1 - Comente seu time para participar |
+        2 - Ao lado do escudo do seu time, tem um icone que representa ele, você empurra! |
+        3 - Use ícones especiais para ganhar medalhas e distanciar dos adversários (opções na parte inferior) |
+        4 - Seus Taps contam para avançar, se você comentar o nome do seu time |
+        5 - Para mudar de time, comente "Salir" e escolha outra equipe | 
+    </div>
+</div>
+
+</body>
+</html>
