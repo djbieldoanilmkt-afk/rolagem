@@ -1,69 +1,191 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-PT">
 <head>
-<title>Tutorial de Rolagem da Equipe</title>
-<meta charset="UTF-8"> 
-<style>
-/* CSS: Estilo e Animação */
-body {
-    /* Fundo totalmente transparente para que apenas o texto apareça na live */
-    background-color: rgba(0, 0, 0, 0); 
-    margin: 0;
-    padding: 0;
-    overflow: hidden; 
-    height: 100vh;
-    display: flex;
-    align-items: center;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS2 Viewmodel Generator</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #121212; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; }
+        
+        /* O Painel Flutuante */
+        #painel {
+            position: absolute; top: 20px; left: 20px; width: 320px;
+            background: rgba(30, 30, 30, 0.95); padding: 25px;
+            border-radius: 12px; border: 1px solid #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-height: 90vh; overflow-y: auto;
+        }
 
-.marquee-container {
-    width: 100%;
-    overflow: hidden;
-    white-space: nowrap;
-    box-sizing: border-box;
-}
+        h2 { margin-top: 0; color: #ff9900; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .control-group { margin-bottom: 15px; }
+        label { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px; color: #ccc; }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: #ff9900; }
+        
+        /* Área do Código de Saída */
+        .output-box {
+            background: #000; padding: 10px; border-radius: 6px;
+            border: 1px solid #444; margin-top: 20px;
+        }
+        textarea {
+            width: 100%; height: 80px; background: transparent; border: none;
+            color: #00ff00; font-family: monospace; font-size: 12px; resize: none; outline: none;
+        }
+        button {
+            width: 100%; padding: 10px; margin-top: 10px;
+            background: #ff9900; border: none; border-radius: 4px;
+            color: black; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        button:hover { background: #ffaa33; }
 
-.scrolling-text {
-    /* Estilo do seu texto */
-    font-family: 'Montserrat', sans-serif; /* Fonte moderna */
-    font-size: 32px; 
-    font-weight: 800; /* Negrito extra */
-    color: #FFEB3B; /* Cor do texto: Amarelo vibrante (Mudado para ser igual a instrução) */
+        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 20px; color: #ff9900; font-weight: bold;}
+    </style>
     
-    /* Repete o texto para criar um efeito contínuo */
-    content: attr(data-text) " | " attr(data-text); 
-    padding-right: 50px; /* Espaço entre as repetições */
-    
-    /* A chave da rolagem */
-    display: inline-block;
-    padding-left: 100%; /* Começa o texto fora da tela */
-    animation: scroll-left 35s linear infinite; /* 20s = velocidade. Menor = mais rápido. */
-}
-
-/* Estilo para as instruções */
-.instruction {
-    color: #FFEB3B; /* Cor amarela para destaque */
-    font-weight: 900;
-}
-
-/* Definição da Animação */
-@keyframes scroll-left {
-  0%   { transform: translate(0, 0); } 
-  100% { transform: translate(-100%, 0); } 
-}
-</style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
 </head>
 <body>
 
-<div class="marquee-container">
-    <div class="scrolling-text">
-        1 - Comente seu time para participar |
-        2 - Ao lado do escudo do seu time, tem um icone que representa ele, você empurra! |
-        3 - Use ícones especiais para ganhar medalhas e distanciar dos adversários (opções na parte inferior) |
-        4 - Seus Taps contam para avançar, se você comentar o nome do seu time |
-        5 - Para mudar de time, comente "Salir" e escolha outra equipe | 
-    </div>
-</div>
+    <div id="loading">A carregar Modelo 3D...</div>
 
+    <div id="painel">
+        <h2>Configurador Viewmodel</h2>
+        
+        <div class="control-group">
+            <label>FOV (Campo de Visão) <span id="val-fov">68</span></label>
+            <input type="range" id="fov" min="54" max="68" step="1" value="60">
+        </div>
+
+        <div class="control-group">
+            <label>Eixo X (Esquerda/Direita) <span id="val-x">1</span></label>
+            <input type="range" id="x" min="-2.5" max="2.5" step="0.1" value="1">
+        </div>
+
+        <div class="control-group">
+            <label>Eixo Y (Perto/Longe) <span id="val-y">1</span></label>
+            <input type="range" id="y" min="-2.0" max="2.0" step="0.1" value="1">
+        </div>
+
+        <div class="control-group">
+            <label>Eixo Z (Cima/Baixo) <span id="val-z">-1</span></label>
+            <input type="range" id="z" min="-2.0" max="2.0" step="0.1" value="-1">
+        </div>
+
+        <hr style="border-color: #333; margin: 20px 0;">
+        <label style="font-size: 11px; color: #666;">AJUSTES VISUAIS (Não afetam o código)</label>
+        <label>Rotação Arma</label> <input type="range" id="rot" min="0" max="6.28" step="0.1" value="0">
+        <label>Tamanho</label> <input type="range" id="scale" min="0.1" max="5" step="0.1" value="1">
+
+        <div class="output-box">
+            <label style="margin-bottom: 5px; font-size: 12px;">Comando para a Consola:</label>
+            <textarea id="output-console" readonly></textarea>
+            <button onclick="copiarCodigo()">COPIAR COMANDO</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // --- CENA BÁSICA ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a1a); // Fundo quase preto
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        document.body.appendChild(renderer.domElement);
+
+        // --- ILUMINAÇÃO ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 3);
+        dirLight.position.set(2, 2, 5);
+        scene.add(dirLight);
+
+        // --- CARREGAR MODELO ---
+        let weaponModel = null;
+        const loader = new GLTFLoader();
+
+        // ATENÇÃO: O ficheiro deve chamar-se "arma.glb" e estar na mesma pasta
+        loader.load('arma.glb', function (gltf) {
+            weaponModel = gltf.scene;
+            scene.add(weaponModel);
+            document.getElementById('loading').style.display = 'none';
+            updateViewmodel(); // Atualiza a primeira vez
+        }, undefined, function (error) {
+            console.error(error);
+            document.getElementById('loading').innerText = "Erro: ficheiro 'arma.glb' não encontrado.";
+            document.getElementById('loading').style.color = "red";
+        });
+
+        // --- LÓGICA PRINCIPAL ---
+        function updateViewmodel() {
+            // Ler valores
+            const fov = document.getElementById('fov').value;
+            const x = document.getElementById('x').value;
+            const y = document.getElementById('y').value;
+            const z = document.getElementById('z').value;
+            
+            // Atualizar números na tela
+            document.getElementById('val-fov').innerText = fov;
+            document.getElementById('val-x').innerText = x;
+            document.getElementById('val-y').innerText = y;
+            document.getElementById('val-z').innerText = z;
+
+            // Gerar texto do comando
+            const comando = `viewmodel_fov ${fov}; viewmodel_offset_x ${x}; viewmodel_offset_y ${y}; viewmodel_offset_z ${z}; viewmodel_presetpos 0;`;
+            document.getElementById('output-console').value = comando;
+
+            if (!weaponModel) return;
+
+            // Atualizar 3D
+            camera.fov = parseFloat(fov);
+            camera.updateProjectionMatrix();
+
+            // Conversão de Coordenadas (Ajuste Fino)
+            weaponModel.position.x = parseFloat(x) * 0.1; 
+            weaponModel.position.y = parseFloat(z) * 0.1; 
+            weaponModel.position.z = -1 - (parseFloat(y) * 0.1);
+
+            // Ajustes Visuais Extras
+            weaponModel.rotation.y = document.getElementById('rot').value;
+            const s = document.getElementById('scale').value;
+            weaponModel.scale.set(s, s, s);
+        }
+
+        // --- EVENTOS ---
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => input.addEventListener('input', updateViewmodel));
+
+        window.copiarCodigo = function() {
+            const copyText = document.getElementById("output-console");
+            copyText.select();
+            document.execCommand("copy");
+            alert("Comando copiado! Cole na consola do CS2.");
+        }
+
+        // --- LOOP DE ANIMAÇÃO ---
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
