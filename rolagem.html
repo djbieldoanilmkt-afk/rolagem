@@ -186,6 +186,15 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-    </script>
+
+        window.addEventListener('message', (event) => {
+  const data = event.data;
+  if (data.type === 'viewmodel_update') {
+    // Aplique os valores data.x, data.y, data.z, data.fov no seu modelo 3D
+    console.log("Recebi atualização:", data);
+  }
+});
+</script>
 </body>
 </html>
+
